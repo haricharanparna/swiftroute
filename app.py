@@ -32,7 +32,7 @@ MAP_STYLE = None if os.environ.get("SWIFTROUTE_NO_TILES") else "dark"
 hexc = lambda c: "#%02x%02x%02x" % tuple(c)
 clock = lambda start, m: f"{start + int(m) // 60:02d}:{int(m) % 60:02d}"
 
-# ------------------------------------------------------------------ sidebar (settings first: they drive the styling)
+# ----------------------------------------------------- sidebar (settings first: they drive the styling)
 with st.sidebar:
     lang = LANGS[st.selectbox("🌐 Language / Idioma / Langue", list(LANGS), key="lang")]
     t = T(lang)
