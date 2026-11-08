@@ -1,5 +1,6 @@
-ortools
-streamlit
-pydeck
-pandas
-requests
+streamlit>=1.50
+ortools>=9.10
+pydeck>=0.9
+pandas>=2.2
+requests>=2.31
+altair>=5

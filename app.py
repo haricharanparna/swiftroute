@@ -83,7 +83,7 @@ header[data-testid="stHeader"] {background: transparent; height: 0;}
 </style>
 """, unsafe_allow_html=True)
 
-profile, source = st.cache_data(load_profile)()
+profile, source, meta = st.cache_data(load_profile)()
 real = "real" in source
 DAYS = {"Sunday": 1, "Monday": 2, "Tuesday": 3, "Wednesday": 4, "Thursday": 5, "Friday": 6, "Saturday": 7}
 COLORS = [[34, 211, 238], [168, 85, 247], [74, 222, 128], [251, 146, 60], [244, 114, 182],
@@ -105,6 +105,7 @@ with st.sidebar:
     st.markdown('<div class="side-h">Chaos mode</div>', unsafe_allow_html=True)
     jam = st.slider("Traffic jam (% slower)", 0, 60, 0, format="%d%%")
     broken = st.toggle("A truck breaks down")
+    urgent = st.toggle("Urgent order comes in (3 packages, deliver 12–14h)")
     st.markdown('<div class="side-h">Map</div>', unsafe_allow_html=True)
     show_naive = st.toggle("Show simple method's routes", False)
 
@@ -163,6 +164,9 @@ with plan_tab:
         if not stops:
             st.stop()
 
+    if urgent:
+        stops = stops + [{"name": "⚡ URGENT order · 875 N Michigan Ave", "lat": 41.8988, "lon": -87.6229,
+                          "demand": 3, "slot": (12, 14)}]
     trucks = max(1, n_trucks - (1 if broken else 0))
     with st.spinner("Optimizing routes…"):
         r = st.cache_data(run, show_spinner=False)(depot, stops, trucks, capacity, profile,
@@ -236,7 +240,7 @@ with plan_tab:
             height=600)
         st.caption(f"{'Simple “nearest stop next” routes' if show_naive else 'SwiftRoute plan'} · "
                    f"road speed this shift {r['factor']:.0%} of empty roads · {r['dist_source']}"
-                   + (" · 🚚 one truck down" if broken else "") + (f" · 🔥 +{jam}% traffic" if jam else ""))
+                   + (" · 🚚 one truck down" if broken else "") + (" · ⚡ urgent order added" if urgent else "") + (f" · 🔥 +{jam}% traffic" if jam else ""))
 
     with side_col:
         st.markdown(f"""
@@ -315,7 +319,12 @@ with whatif_tab:
 # ------------------------------------------------------------------ traffic
 with traffic_tab:
     st.markdown("#### When are Chicago's roads slow?")
-    st.caption(f"Average speed by hour and weekday, as % of the fastest hour · {source}")
+    st.caption(f"Each road segment's speed as % of its own free-flow speed, averaged over all segments · {source}")
+    if meta:
+        m1, m2, m3 = st.columns(3)
+        m1.metric("Speed readings", f"{meta['readings']:,}")
+        m2.metric("Road segments", f"{meta['segments']:,}")
+        m3.metric("Period", f"{pd.Timestamp(meta['from']):%b %d} – {pd.Timestamp(meta['to']):%b %d, %Y}")
     inv = {v: k[:3] for k, v in DAYS.items()}
     heat = profile.assign(Day=profile.day_of_week.map(inv), Speed=(profile.speed_factor * 100).round(1))
     st.altair_chart(alt.Chart(heat).mark_rect(cornerRadius=4).encode(
@@ -326,7 +335,7 @@ with traffic_tab:
         .properties(height=300, background="transparent")
         .configure_view(strokeWidth=0).configure_axis(domainColor="#334155", labelColor="#94A3B8", titleColor="#94A3B8")
         .configure_legend(labelColor="#94A3B8", titleColor="#94A3B8"), width="stretch")
-    st.caption("Blue = free-flowing · red = rush hour. The planner uses these numbers to estimate drive times for the shift.")
+    st.caption("Blue = free-flowing · red = rush hour. Every drive in a plan is slowed by the value for the hour it happens in.")
 
 # ------------------------------------------------------------------ about
 with about_tab:
@@ -334,16 +343,18 @@ with about_tab:
     c1.markdown("""
 #### How it works
 1. **Addresses → map points** with OpenStreetMap.
-2. **Real road distances** between every pair of stops (OSRM on OpenStreetMap roads).
-3. **Traffic:** Chicago Traffic Tracker history (1,000+ road segments) gives how slow roads are
-   at each hour and weekday; drive times are adjusted for the hours of the shift.
+2. **Real roads:** distance and empty-road drive time between every pair of stops (OSRM on OpenStreetMap).
+3. **Traffic:** 2.6M speed readings from 1,046 Chicago road segments (City of Chicago Traffic Tracker,
+   April 2026) give how much slower roads are at each hour of the week. Each drive is slowed by the
+   value for the hour it happens in.
 4. **Optimizer:** Google OR-Tools solves the vehicle routing problem with truck capacity and customer
    time slots, minimizing real cost (fuel + driver pay).
-5. **Benchmark:** the same day planned with the simple "go to the nearest stop next" method.
+5. **Check:** every route is replayed hour by hour with real traffic; all numbers come from that replay.
+6. **Benchmark:** the same day planned with the simple "go to the nearest stop next" method.
 """)
     c2.markdown("""
 #### Assumptions
-- Empty-road city speed **40 km/h**
+- Empty-road drive times from OpenStreetMap (40 km/h straight-line fallback if offline)
 - **5 min** to hand over each delivery
 - **$0.60 / km** fuel and wear · **$25 / hour** per driver
 - **0.25 kg CO₂ / km** (delivery van)
