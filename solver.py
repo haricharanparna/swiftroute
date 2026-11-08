@@ -13,7 +13,7 @@ CENTS_PER_KM = 60          # $0.60 per km (fuel + wear)
 CENTS_PER_DRIVER_MIN = 42  # $25 per hour
 
 
-def solve(dist, mins, demands, windows, n_trucks, capacity, seconds=5):
+def solve(dist, mins, demands, windows, n_trucks, capacity, seconds=5, solutions=None):
     n = len(dist)
     mgr = pywrapcp.RoutingIndexManager(n, n_trucks, 0)
     model = pywrapcp.RoutingModel(mgr)
@@ -46,7 +46,11 @@ def solve(dist, mins, demands, windows, n_trucks, capacity, seconds=5):
     p = pywrapcp.DefaultRoutingSearchParameters()
     p.first_solution_strategy = routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC
     p.local_search_metaheuristic = routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH
-    p.time_limit.seconds = seconds
+    if solutions:   # deterministic stop: same answer on any computer (time limit is only a safety net)
+        p.solution_limit = solutions
+        p.time_limit.seconds = 120
+    else:           # interactive app: stop after a few seconds
+        p.time_limit.seconds = seconds
     sol = model.SolveWithParameters(p)
     if sol is None:          # no plan found in the time limit: report every stop as not delivered
         return []

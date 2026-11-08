@@ -30,6 +30,17 @@ OKABE_ITO = [[86, 180, 233], [230, 159, 0], [0, 158, 115], [240, 228, 66], [0, 1
              [213, 94, 0], [204, 121, 167], [255, 255, 255], [153, 153, 153], [117, 112, 179]]
 MAP_STYLE = None if os.environ.get("SWIFTROUTE_NO_TILES") else "dark"
 hexc = lambda c: "#%02x%02x%02x" % tuple(c)
+
+
+def fit_view(lonlats, width=800, height=600, pad=0.85):
+    """Map view (centre + zoom) that shows every point, like a 'home' / zoom-to-fit button."""
+    import math
+    lons, lats = [p[0] for p in lonlats], [p[1] for p in lonlats]
+    lon0, lon1, lat0, lat1 = min(lons), max(lons), min(lats), max(lats)
+    y = lambda lat: math.log(math.tan(math.pi / 4 + math.radians(lat) / 2))      # Web Mercator
+    zx = math.log2(width * pad / 512 * 360 / max(lon1 - lon0, 1e-4))
+    zy = math.log2(height * pad / 512 * 2 * math.pi / max(y(lat1) - y(lat0), 1e-6))
+    return pdk.ViewState(longitude=(lon0 + lon1) / 2, latitude=(lat0 + lat1) / 2, zoom=min(zx, zy, 16), pitch=0, bearing=0)
 clock = lambda start, m: f"{start + int(m) // 60:02d}:{int(m) % 60:02d}"
 
 # ----------------------------------------------------- sidebar (settings first: they drive the styling)
@@ -271,9 +282,17 @@ with plan_tab:
     map_col, side_col = st.columns([2.3, 1], gap="medium")
     with map_col:
         st.markdown(f'<p class="sr-only">{t("map_alt", n=len(routes))}</p>', unsafe_allow_html=True)
+        # "Home" button (like Desmos): fit the view to every route. Changing the initial view state by a
+        # tiny amount makes the map jump back to it, even after the user has zoomed or dragged.
+        if st.button(t("fit"), key="fit_btn", help=t("fit_help")):
+            st.session_state["fit_n"] = st.session_state.get("fit_n", 0) + 1
+        home = fit_view([c for p in paths for c in p["path"]] + [[d["lon"], d["lat"]] for d in dots + depot_pt])
+        n = st.session_state.get("fit_n", 0)      # nudge EVERY field: Streamlit only re-applies fields that changed
+        home.longitude += n * 1e-9; home.latitude += n * 1e-9; home.zoom += n * 1e-7
+        home.pitch += n * 1e-7; home.bearing += n * 1e-7
         st.pydeck_chart(pdk.Deck(
             layers=layers, map_style=MAP_STYLE,
-            initial_view_state=pdk.ViewState(latitude=depot[1] - 0.01, longitude=depot[2] + 0.005, zoom=11.1, pitch=35),
+            initial_view_state=home,
             tooltip={"text": "{label}", "style": {"background": "#0F1629", "color": "#E2E8F0",
                                                   "fontFamily": "Inter", "fontSize": "12px", "borderRadius": "8px"}}),
             height=600)
@@ -338,7 +357,7 @@ with replay_tab:
     embed(replay.html(replay.trips(routes, pts, details), rstops,
                                 {"lon": depot[2], "lat": depot[1], "name": depot[0]}, COLORS, start_hour,
                                 {"delivered": t("delivered").lower(), "play": t("play"), "pause": t("pause"),
-                                 "speed": t("speed"), "aria": t("map_alt", n=len(routes))},
+                                 "speed": t("speed"), "aria": t("map_alt", n=len(routes)), "fit": t("fit")},
                                 autoplay=not calm), 640)
 
 # ------------------------------------------------------------------ driver directions (Google-Maps style)

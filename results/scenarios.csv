@@ -3,5 +3,5 @@ Scenario,Trucks,Delivered,On time %,Km,Cost ($),CO2 (kg),Simple method delivered
 +1 truck,5,40/40,100.0,161.7,294,40.4,40/40,75.0,439
 Traffic 30% worse,4,37/40,92.5,146.3,319,36.6,35/40,65.0,433
 Bigger trucks (25 packages),4,40/40,100.0,143.5,274,35.9,40/40,70.0,435
-Orders double (80 stops),4,43/80,53.8,124.8,258,31.2,40/80,40.0,409
-Orders double + 4 more trucks,8,75/80,93.8,261.9,501,65.5,72/80,62.5,770
+Orders double (80 stops),4,43/80,52.5,120.1,252,30.0,40/80,40.0,409
+Orders double + 4 more trucks,8,75/80,93.8,251.5,488,62.9,72/80,62.5,770

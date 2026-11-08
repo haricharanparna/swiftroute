@@ -1,7 +1,10 @@
 """Robustness check: is SwiftRoute's advantage real, or one lucky day?
 Runs 10 different random delivery days (40 stops, 4 trucks x 15 packages, Tuesday 9:00)
 on real roads + real traffic, and compares with the simple method each time.
-Run:  python validate.py   ->  results/validation.csv"""
+Run:  python validate.py   ->  results/validation.csv
+
+Reproducible: same 10 seeds, traffic profile (data/traffic_profile.csv), road tables
+(data/road_cache/) and a fixed solver budget (1000 solutions, not seconds) -> identical numbers."""
 import os
 
 import pandas as pd
@@ -10,10 +13,11 @@ import sample
 from plan import run
 from traffic import load_profile
 
+SEARCH = 1000  # fixed search budget (solutions found), so every computer gets identical results
 profile, source, _ = load_profile()
 rows = []
 for seed in range(1, 11):
-    r = run(sample.DEPOT, sample.make(40, seed=seed), 4, 15, profile, 3, 9, seconds=5)
+    r = run(sample.DEPOT, sample.make(40, seed=seed), 4, 15, profile, 3, 9, solutions=SEARCH)
     s, b = r["smart_kpi"], r["naive_kpi"]
     rows.append({"day (seed)": seed, "SwiftRoute cost": s["Cost ($)"], "Simple cost": b["Cost ($)"],
                  "Saving %": round(100 * (b["Cost ($)"] - s["Cost ($)"]) / b["Cost ($)"], 1),

@@ -25,8 +25,8 @@ SwiftRoute plans every delivery truck's route around **truck capacity**, **custo
 
 **Robustness, 10 different random days** (40 orders, 4 trucks × 15 packages, `validate.py`):
 SwiftRoute was **cheaper on 10/10 days** and **more on time on 10/10 days**:
-mean **−31.0% cost** (range −11.8% to −49.8%) and **+23.2 points on time** (+12.5 to +32.5).
-It also **delivered at least as many orders every day** (mean 36.4/40 vs 35.2/40), so the savings
+mean **−32.6% cost** (range −15.7% to −51.1%) and **+23.8 points on time** (+12.5 to +32.5).
+It also **delivered at least as many orders every day** (mean 36.5/40 vs 35.2/40), so the savings
 don't come from skipping work.
 
 **Scenario analysis** (sample day, `scenarios.py`). *On time* = share of **all** orders, so undelivered stops count against us:
@@ -37,8 +37,8 @@ don't come from skipping work.
 | +1 truck | 40/40 | **100%** | **$294** | 40/40 | 75.0% | $439 |
 | Traffic 30% worse | 37/40 | **92.5%** | **$319** | 35/40 | 65.0% | $433 |
 | Bigger trucks (25 packages) | 40/40 | **100%** | **$274** | 40/40 | 70.0% | $435 |
-| Orders double (80 stops) | 43/80 | 53.8% | $258 | 40/80 | 40.0% | $409 |
-| Orders double + 4 trucks | 75/80 | **93.8%** | **$501** | 72/80 | 62.5% | $770 |
+| Orders double (80 stops) | 43/80 | 52.5% | $252 | 40/80 | 40.0% | $409 |
+| Orders double + 4 trucks | 75/80 | **93.8%** | **$488** | 72/80 | 62.5% | $770 |
 
 **About the benchmark:** "Simple" = go to the nearest unvisited stop that still fits in the truck.
 It is a *deliberately simple* stand-in for hand-planning, **not a second optimizer**: it respects
@@ -74,6 +74,27 @@ time, at almost the same cost.
 | `docs/` | Rubric check, pitch script, video plan, screenshots |
 
 Assumptions: 5 min per delivery · $0.60/km · $25/h per driver · 0.25 kg CO₂/km · 8-hour shift.
+
+## Reproduce the results
+Every number above is **deterministic**: same seeds, the committed traffic profile (`data/traffic_profile.csv`),
+cached road tables (`data/road_cache/`), and a solver that stops after a fixed **1,000 solutions** (not seconds).
+Running twice, or on another computer, gives byte-identical CSVs.
+```bash
+python validate.py          # 10-day robustness test  -> results/validation.csv  (~3 min)
+python scenarios.py         # 6 scenarios             -> results/scenarios.csv
+pip install pytest && python -m pytest tests -q   # 10 correctness tests (~2 min)
+```
+The tests check: no stop visited twice, capacity never exceeded, arrivals inside time windows, an order
+too big for any truck is left unassigned (not a crash), unassigned orders count against on-time %, a
+"no solution" result returns an empty plan, determinism, benchmark capacity, the replay catching lateness,
+and orders outside the shift reported as undelivered.
+
+## The model
+Vehicle routing with capacity and time windows. **Minimize** $0.60 × km + $25/h × each truck's time out
++ $10,000 × each undelivered order, **subject to** each order served at most once, packages per truck ≤ Q,
+time-window open ≤ arrival ≤ close, arrival(j) ≥ arrival(i) + 5 min + drive(i→j), and
+drive(i→j) = empty-road time ÷ traffic factor(day, hour). Solved with OR-Tools (path-cheapest-arc start +
+guided local search): a strong heuristic, not a proof of optimality.
 
 ## Run it
 ```bash

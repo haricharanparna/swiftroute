@@ -1,5 +1,8 @@
 """Addresses -> map points, and distance/time between points."""
+import hashlib
+import json
 import math
+import os
 import time
 import requests
 
@@ -20,16 +23,31 @@ def km_between(a, b):
     return 2 * 6371 * math.asin(math.sqrt(h)) * 1.3
 
 
+CACHE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "road_cache")
+
+
 def road_table(points):
     """Real road distance (km) and empty-road drive time (min) between every pair of stops,
     from the free OSRM server on OpenStreetMap roads (knows highways are faster than side streets).
+    Saved in data/road_cache/ so experiments re-run on exactly the same road data.
     Returns (km, minutes) or None if offline."""
     coords = ";".join(f"{lon:.6f},{lat:.6f}" for lat, lon in points)
+    path = os.path.join(CACHE_DIR, hashlib.sha1(coords.encode()).hexdigest()[:16] + ".json")
+    if os.path.exists(path):
+        with open(path) as f:
+            d = json.load(f)
+        return d["km"], d["min"]
     try:
         r = requests.get(f"https://router.project-osrm.org/table/v1/driving/{coords}",
                          params={"annotations": "distance,duration"}, timeout=60).json()
         km = [[d / 1000 for d in row] for row in r["distances"]]
         mins = [[s / 60 for s in row] for row in r["durations"]]
+        try:
+            os.makedirs(CACHE_DIR, exist_ok=True)
+            with open(path, "w") as f:
+                json.dump({"coords": coords, "km": km, "min": mins}, f)
+        except OSError:
+            pass
         return km, mins
     except Exception:
         return None

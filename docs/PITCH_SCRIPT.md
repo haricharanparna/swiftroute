@@ -34,7 +34,7 @@ Diagram: Addresses → OpenStreetMap → real drive times × hourly traffic → 
 **Slide 9: Results & validation** (50 s)
 - Scenario table: bigger trucks → **100% on time**. "The fleet is limited by truck size more than time: a decision a manager can act on."
 - Delivered counts next to cost: "With 4 small trucks, 3 of 40 orders can't make their slot (the simple method misses 5). On-time % is out of all orders, so those count against us."
-- Robustness: "We tested **10 different days**. SwiftRoute was cheaper and more on time on **all 10**. Average **31% cheaper, +23.2 points on time**, and it delivered at least as many orders every day, so the savings aren't from skipping work."
+- Robustness: "We tested **10 different days**. SwiftRoute was cheaper and more on time on **all 10**. Average **33% cheaper, +23.8 points on time**, and it delivered at least as many orders every day, so the savings aren't from skipping work."
 - Limitations: generated demo customers; one city-wide traffic factor per hour.
 
 **Slide 10: Impact & next steps** (30 s)
@@ -44,6 +44,8 @@ Diagram: Addresses → OpenStreetMap → real drive times × hourly traffic → 
 - *Why not just Google Maps?* Google routes one vehicle. We split work across a fleet with capacity and time slots, then hand each driver's route to Google Maps.
 - *How do you know it's better?* Same days, same traffic replay, two methods: 10/10 days cheaper and more on time.
 - *Does it scale?* OR-Tools handles hundreds of stops; production would self-host OSRM.
+- *Can we reproduce it?* Yes: `python validate.py` gives identical numbers on any computer (fixed solver budget, cached roads, committed traffic data). 10 automated tests check the solver.
+- *Is it optimal?* OR-Tools' guided local search is a strong heuristic, not a proof of optimality; more search finds slightly better routes.
 - *Isn't the baseline too weak?* It's meant to be: it's how small fleets plan by hand today. It respects capacity; we measure its lateness in the same replay. Beating hand-planning is the real-world bar.
 - *Do you skip deliveries to look cheaper?* No: we deliver at least as many as the benchmark on all 10 days, and missed orders count against our on-time %.
 - *Why more km sometimes?* Cost = fuel + driver time; a slightly longer route that avoids waiting and lateness is cheaper overall.

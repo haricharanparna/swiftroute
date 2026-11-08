@@ -14,11 +14,14 @@ CASES = {
 }
 
 
-def run_all(profile, day=3, capacity=15, seconds=10, progress=None):
+SEARCH = 1000  # fixed search budget (solutions), so results are identical on any computer
+
+
+def run_all(profile, day=3, capacity=15, progress=None):
     rows = []
     for i, (name, c) in enumerate(CASES.items()):
         r = run(sample.DEPOT, sample.make(c["n"]), c["trucks"], c.get("cap", capacity), profile, day,
-                c["hour"], c.get("worse", 0.0), seconds)
+                c["hour"], c.get("worse", 0.0), solutions=SEARCH)
         s, b = r["smart_kpi"], r["naive_kpi"]
         rows.append({"Scenario": name, "Trucks": s["Trucks used"], "Delivered": s["Delivered"],
                      "On time %": s["On time %"], "Km": s["Total km"], "Cost ($)": s["Cost ($)"],

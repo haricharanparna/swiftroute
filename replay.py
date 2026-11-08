@@ -62,6 +62,8 @@ def html(trip_data, stops, depot, colors, start_hour, labels, autoplay=True, hei
  button,select{{background:linear-gradient(135deg,#06B6D4,#8B5CF6);color:#fff;border:0;border-radius:10px;
        padding:8px 16px;font-weight:700;cursor:pointer;font-size:14px}}
  select{{background:#0F1629;border:1px solid #334155}}
+ .home{{position:absolute;right:16px;top:16px;z-index:2;width:48px;height:48px;padding:0;font-size:24px;
+       background:rgba(10,16,32,.82);border:1px solid #334155;border-radius:12px}}
  button:focus-visible,select:focus-visible,input:focus-visible{{outline:3px solid #FACC15;outline-offset:2px}}
  input[type=range]{{flex:1;accent-color:#22D3EE}}
  .bar{{height:6px;background:#1E293B;border-radius:9px;margin-top:10px;overflow:hidden}} .bar i{{display:block;height:100%;
@@ -70,6 +72,7 @@ def html(trip_data, stops, depot, colors, start_hour, labels, autoplay=True, hei
 <div id="map" role="img" aria-label="{labels['aria']}"></div>
 <div class="hud" aria-live="polite"><div class="clock" id="clock">09:00</div>
  <div class="sub"><b id="done">0</b> / <span id="total">0</span> {labels['delivered']}</div><div class="bar"><i id="prog"></i></div></div>
+<button class="home" id="home" title="{labels['fit']}" aria-label="{labels['fit']}">⌂</button>
 <div class="ctrl"><button id="play" aria-label="{labels['play']}">▶ {labels['play']}</button>
  <input id="time" type="range" min="0" max="1000" value="0" aria-label="time">
  <label style="font-size:13px;color:#94A3B8">{labels['speed']}
@@ -107,8 +110,18 @@ function layers() {{
       getFillColor:[255,255,255], stroked:true, getLineColor:[34,211,238], lineWidthMinPixels:4}}),
   ];
 }}
+// "home" view = fit every route and stop, like Desmos' home button
+function homeView() {{
+  const pts = D.trips.flatMap(t => t.path).concat(D.stops.map(s => [s.lon, s.lat]), [[D.depot.lon, D.depot.lat]]);
+  const lons = pts.map(p => p[0]), lats = pts.map(p => p[1]);
+  const el = document.getElementById('map');
+  const vp = new deck.WebMercatorViewport({{width: el.clientWidth || 1000, height: el.clientHeight || 600}});
+  const v = vp.fitBounds([[Math.min(...lons), Math.min(...lats)], [Math.max(...lons), Math.max(...lats)]],
+                         {{padding: {{top: 120, bottom: 110, left: 40, right: 80}}}});
+  return {{longitude: v.longitude, latitude: v.latitude, zoom: v.zoom, pitch: 0, bearing: 0}};
+}}
 const opts = {{container:'map', controller:true,
-  initialViewState:{{longitude:D.depot.lon, latitude:D.depot.lat-0.02, zoom:10.8, pitch:45, bearing:-12}},
+  initialViewState: homeView(),
   getTooltip:({{object}}) => object && object.name ? object.name : null, layers:layers()}};
 try {{ if (window.maplibregl) {{ opts.map = maplibregl; opts.mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'; }} }} catch(e) {{}}
 const view = new deck.DeckGL(opts);
@@ -129,6 +142,8 @@ function tick(now) {{
 const btn = document.getElementById('play');
 function setBtn() {{ btn.textContent = playing ? '⏸ {labels['pause']}' : '▶ {labels['play']}'; }}
 btn.onclick = () => {{ if (T>=END) T = 0; playing = !playing; setBtn(); }};
+document.getElementById('home').onclick = () => view.setProps({{initialViewState: {{...homeView(),
+  transitionDuration: 700, transitionInterpolator: new deck.FlyToInterpolator()}}}});
 document.getElementById('time').oninput = e => {{ T = END*e.target.value/1000; playing = false; setBtn(); draw(); }};
 if (!D.autoplay) T = END;
 setBtn(); draw(); requestAnimationFrame(tick);

@@ -28,7 +28,7 @@ def simulate(route, free, windows, factor_at, start_hour):
     return out
 
 
-def run(depot, stops, n_trucks, capacity, profile, day, start_hour, traffic_worse=0.0, seconds=5):
+def run(depot, stops, n_trucks, capacity, profile, day, start_hour, traffic_worse=0.0, seconds=5, solutions=None):
     end_hour = start_hour + SHIFT_HOURS
     outside = [s for s in stops if s["slot"][1] <= start_hour or s["slot"][0] >= end_hour]
     stops = [s for s in stops if s not in outside]
@@ -46,7 +46,7 @@ def run(depot, stops, n_trucks, capacity, profile, day, start_hour, traffic_wors
     leave_hour = [start_hour] + [min(max((s["slot"][0] + s["slot"][1]) / 2, start_hour), end_hour - 1) for s in stops]
     mins = [[free[a][b] / factor_at(leave_hour[a]) for b in range(len(points))] for a in range(len(points))]
 
-    smart = solve(dist, mins, demands, windows, n_trucks, capacity, seconds)
+    smart = solve(dist, mins, demands, windows, n_trucks, capacity, seconds, solutions)
     naive = baseline(dist, mins, demands, windows, n_trucks, capacity)
     smart = [simulate(r, free, windows, factor_at, start_hour) for r in smart]
     naive = [simulate(r, free, windows, factor_at, start_hour) for r in naive]

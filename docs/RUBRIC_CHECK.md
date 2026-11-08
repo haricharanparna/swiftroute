@@ -25,7 +25,7 @@ Problem statement: **Last-Mile Delivery Route Optimization** (Operations Researc
 | Innovation & Originality | 20% | Real-traffic **replay** of every route ("honest check") instead of trusting the plan; animated day replay; chaos mode; voice + location input; 3 languages |
 | Technical Implementation | 25% | OR-Tools VRP with capacity + time windows + cost objective; time-dependent drive times; OSRM real roads + turn-by-turn; 2.66 M-reading data pipeline; bundled deck.gl animation |
 | Problem Relevance | 15% | Exactly the stated problem; all three constraints (capacity, time windows, traffic) handled |
-| Data & Analytical Rigor | 15% | Real public data (City of Chicago, OpenStreetMap); per-segment free-flow normalisation; baseline comparison; 6 scenarios; **10-day robustness test: cheaper 10/10 days, mean −31.0%, +23.2 pts on time, delivered ≥ benchmark every day (36.4 vs 35.2 of 40)** |
+| Data & Analytical Rigor | 15% | Real public data (City of Chicago, OpenStreetMap); per-segment free-flow normalisation; baseline comparison; 6 scenarios; **10-day robustness test: cheaper 10/10 days, mean −32.6%, +23.8 pts on time, delivered ≥ benchmark every day (36.5 vs 35.2 of 40); deterministic and byte-identical on re-run; 10 automated correctness tests** |
 | Impact & Feasibility | 15% | Free/open stack, runs on a laptop; Google Maps hand-off for drivers; ~$119/day saved for a 4-truck depot (≈ $30k/year at 250 days) |
 | Presentation & Documentation | 10% | Polished UI, accessibility, README, rubric map, script + video plan |
 
