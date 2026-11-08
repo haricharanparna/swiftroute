@@ -213,7 +213,8 @@ class T:
         self.lang = lang
 
     def __call__(self, key, **kw):
-        s = S[key].get(self.lang) or S[key]["en"]
+        entry = S.get(key, {})          # a missing label shows the key instead of crashing the app
+        s = entry.get(self.lang) or entry.get("en") or key
         return s.format(**kw) if kw else s
 
     def scenario(self, name):
