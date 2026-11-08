@@ -14,12 +14,14 @@ from plan import run
 from traffic import load_profile
 
 SEARCH = 1000  # fixed search budget (solutions found), so every computer gets identical results
+VAN_COST = 0   # $ per van per day (0 = off; same results as before the option existed)
 profile, source, _ = load_profile()
 rows = []
 for seed in range(1, 11):
-    r = run(sample.DEPOT, sample.make(40, seed=seed), 4, 15, profile, 3, 9, solutions=SEARCH)
+    r = run(sample.DEPOT, sample.make(40, seed=seed), 4, 15, profile, 3, 9, solutions=SEARCH, van_cost=VAN_COST)
     s, b = r["smart_kpi"], r["naive_kpi"]
     rows.append({"day (seed)": seed, "SwiftRoute cost": s["Cost ($)"], "Simple cost": b["Cost ($)"],
+                 "Vans used": s["Trucks used"], "Simple vans": b["Trucks used"],
                  "Saving %": round(100 * (b["Cost ($)"] - s["Cost ($)"]) / b["Cost ($)"], 1),
                  "SwiftRoute delivered": s["Delivered"], "Simple delivered": b["Delivered"],
                  "SwiftRoute on time %": s["On time %"], "Simple on time %": b["On time %"],

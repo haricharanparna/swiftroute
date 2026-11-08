@@ -115,3 +115,13 @@ def test_run_reports_stops_outside_the_shift_as_undelivered():
     r = plan.run(("Depot", 41.8868, -87.6577), stops, 1, 15, prof, 3, 9, solutions=50)
     assert [s["name"] for s in r["outside"]] == ["early"]
     assert r["smart_kpi"]["Delivered"] == "1/2"
+
+
+def test_van_cost_never_uses_more_vans_and_is_charged():
+    dist, mins, dem, win = instance(n=12, slot_hours=(8,))
+    free = solve(dist, mins, dem, win, 4, 30, solutions=300, van_cost=0)
+    paid = solve(dist, mins, dem, win, 4, 30, solutions=300, van_cost=200)
+    assert len(paid) <= len(free) and len(paid) >= 1
+    assert sorted(served(paid)) == sorted(served(free))        # still delivers the same orders
+    k0, k1 = kpis(paid, dist, win, 12), kpis(paid, dist, win, 12, van_cost=200)
+    assert k1["Cost ($)"] - k0["Cost ($)"] == 200 * len(paid)

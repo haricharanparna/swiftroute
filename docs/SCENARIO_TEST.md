@@ -33,8 +33,14 @@ All 12 addresses found · **12/12 delivered, 100% on time** (simple method: 33.3
 
 ## What we learned
 - The tight 16–17 stop was reached at 16:01: the plan waits for slots to open instead of arriving early.
-- The model pays drivers only while they are out, so it prefers **three short trips** (≈1 h each) over one long
-  one. A real florist might prefer fewer vans; a fixed cost per van would capture that. Noted as a limitation.
+- **Why three vans?** At first we thought it was because drivers are only paid while out on the road. Testing
+  showed otherwise: in this model **each van makes one trip** (it never returns to the shop to reload), so
+  18 bouquets with 8 per van needs at least 3 vans. With 15-bouquet vans it uses the minimum of 2.
+- We added a **cost per van used** (sidebar slider, default $0 = off) so the optimizer prefers fewer vans whenever
+  capacity allows; an automated test checks it never uses more vans and is charged correctly. In this scenario
+  the van count was already at its minimum, so the routes didn't change (only the cost: $267 vs $325 at $50/van).
+- **Real limitation:** vans can't go back to the depot to reload mid-day, which is what a real florist would do
+  (one van, a morning run and an afternoon run). Multi-trip routing is the natural next step.
 
 ![Plan](scenario_plan.png)
 ![Replay](scenario_replay.png)

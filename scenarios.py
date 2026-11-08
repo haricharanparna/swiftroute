@@ -15,13 +15,14 @@ CASES = {
 
 
 SEARCH = 1000  # fixed search budget (solutions), so results are identical on any computer
+VAN_COST = 0   # $ per van per day (rental, insurance, driver's minimum shift); 0 = off, set in the app sidebar
 
 
-def run_all(profile, day=3, capacity=15, progress=None):
+def run_all(profile, day=3, capacity=15, progress=None, van_cost=VAN_COST):
     rows = []
     for i, (name, c) in enumerate(CASES.items()):
         r = run(sample.DEPOT, sample.make(c["n"]), c["trucks"], c.get("cap", capacity), profile, day,
-                c["hour"], c.get("worse", 0.0), solutions=SEARCH)
+                c["hour"], c.get("worse", 0.0), solutions=SEARCH, van_cost=van_cost)
         s, b = r["smart_kpi"], r["naive_kpi"]
         rows.append({"Scenario": name, "Trucks": s["Trucks used"], "Delivered": s["Delivered"],
                      "On time %": s["On time %"], "Km": s["Total km"], "Cost ($)": s["Cost ($)"],

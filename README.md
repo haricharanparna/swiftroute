@@ -74,7 +74,8 @@ time, at almost the same cost.
 | `scenarios.py`, `validate.py` | Scenario analysis and 10-day robustness test → `results/` |
 | `docs/` | Rubric check, pitch script, video plan, screenshots |
 
-Assumptions: 5 min per delivery · $0.60/km · $25/h per driver · 0.25 kg CO₂/km · 8-hour shift.
+Assumptions: 5 min per delivery · $0.60/km · $25/h per driver · 0.25 kg CO₂/km · 8-hour shift ·
+optional cost per van used (sidebar, default $0).
 
 ## Reproduce the results
 Every number above is **deterministic**: same seeds, the committed traffic profile (`data/traffic_profile.csv`),
@@ -111,6 +112,7 @@ Voice typing works best in Chrome or Edge; allow the microphone / location when 
 
 ## Limitations
 - Demo customers are generated (fixed seeds), not real orders.
+- Each van makes one trip: it can't return to the depot to reload mid-day (multi-trip routing is the next step).
 - Traffic is one city-wide factor per hour from arterial streets (bus-GPS estimates), not per street.
 - SwiftRoute sometimes drives more km: it trades distance for fewer driver hours and late deliveries.
 - Uses free public OSRM / Nominatim / Google speech servers, fine for demos; production would self-host.

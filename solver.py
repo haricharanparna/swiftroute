@@ -13,7 +13,7 @@ CENTS_PER_KM = 60          # $0.60 per km (fuel + wear)
 CENTS_PER_DRIVER_MIN = 42  # $25 per hour
 
 
-def solve(dist, mins, demands, windows, n_trucks, capacity, seconds=5, solutions=None):
+def solve(dist, mins, demands, windows, n_trucks, capacity, seconds=5, solutions=None, van_cost=0):
     n = len(dist)
     mgr = pywrapcp.RoutingIndexManager(n, n_trucks, 0)
     model = pywrapcp.RoutingModel(mgr)
@@ -22,6 +22,9 @@ def solve(dist, mins, demands, windows, n_trucks, capacity, seconds=5, solutions
     def km_cost(i, j):
         return int(dist[mgr.IndexToNode(i)][mgr.IndexToNode(j)] * CENTS_PER_KM)
     model.SetArcCostEvaluatorOfAllVehicles(model.RegisterTransitCallback(km_cost))
+    # fixed daily cost of putting a van on the road (rental, insurance, driver's minimum shift):
+    # makes the optimizer weigh 'one more van' against 'a longer route'
+    model.SetFixedCostOfAllVehicles(int(round(van_cost * 100)))
 
     def minutes(i, j):
         a, b = mgr.IndexToNode(i), mgr.IndexToNode(j)
@@ -88,8 +91,8 @@ def baseline(dist, mins, demands, windows, n_trucks, capacity):
     return routes
 
 
-def kpis(routes, dist, windows, n_stops, cost_per_km=0.6, driver_per_hr=25, co2_per_km=0.25):
-    """Assumptions: $0.60/km fuel+wear, $25/hr driver, 0.25 kg CO2/km (delivery van)."""
+def kpis(routes, dist, windows, n_stops, cost_per_km=0.6, driver_per_hr=25, co2_per_km=0.25, van_cost=0):
+    """Assumptions: $0.60/km fuel+wear, $25/hr driver, 0.25 kg CO2/km (delivery van), van_cost $/day per van used."""
     km = sum(dist[a][b] for r in routes for (a, _), (b, _) in zip(r, r[1:]))
     hours = sum(r[-1][1] - r[0][1] for r in routes) / 60
     served = [(s, t) for r in routes for s, t in r[1:-1]]
@@ -98,7 +101,7 @@ def kpis(routes, dist, windows, n_stops, cost_per_km=0.6, driver_per_hr=25, co2_
         "Trucks used": len(routes),
         "Total km": round(km, 1),
         "Driver hours": round(hours, 1),
-        "Cost ($)": round(km * cost_per_km + hours * driver_per_hr),
+        "Cost ($)": round(km * cost_per_km + hours * driver_per_hr + van_cost * len(routes)),
         "CO2 (kg)": round(km * co2_per_km, 1),
         "Delivered": f"{len(served)}/{n_stops}",
         "On time %": round(100 * on_time / n_stops, 1),

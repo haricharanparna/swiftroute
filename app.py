@@ -65,6 +65,7 @@ with st.sidebar:
     st.markdown(f'<div class="side-h">{t("fleet")}</div>', unsafe_allow_html=True)
     n_trucks = st.slider(t("trucks"), 1, 10, 4)
     capacity = st.slider(t("capacity"), 5, 40, 15)
+    van_cost = st.slider(t("van_cost"), 0, 200, scenarios.VAN_COST, step=10, format="$%d", help=t("van_cost_help"))
     st.markdown(f'<div class="side-h">{t("chaos")}</div>', unsafe_allow_html=True)
     jam = st.slider(t("jam"), 0, 60, 0, format="%d%%")
     broken = st.toggle(t("breakdown"))
@@ -319,7 +320,7 @@ with plan_tab:
         stops = stops + [{"name": "⚡ URGENT · 875 N Michigan Ave", "lat": 41.8988, "lon": -87.6229, "demand": 3, "slot": (12, 14)}]
     trucks = max(1, n_trucks - (1 if broken else 0))
     with st.spinner(t("optimizing")):
-        r = st.cache_data(run, show_spinner=False)(depot, stops, trucks, capacity, profile, day, start_hour, jam / 100)
+        r = st.cache_data(run, show_spinner=False)(depot, stops, trucks, capacity, profile, day, start_hour, jam / 100, van_cost=van_cost)
     s, b = r["smart_kpi"], r["naive_kpi"]
     if not r["smart"]:
         st.error({"en": "No plan could be found for these settings. Try more trucks, bigger trucks or a different shift.",
@@ -508,7 +509,7 @@ with whatif_tab:
     st.caption(t("whatif_help"))
     if st.button(t("run_scen"), type="primary"):
         bar = st.progress(0.0)
-        df = scenarios.run_all(profile, day, capacity, progress=lambda i, n, name: bar.progress(i / n, text=t.scenario(name)))
+        df = scenarios.run_all(profile, day, capacity, van_cost=van_cost, progress=lambda i, n, name: bar.progress(i / n, text=t.scenario(name)))
         bar.empty()
         st.session_state["scen"] = df
     if "scen" in st.session_state:
