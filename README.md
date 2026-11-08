@@ -1,6 +1,6 @@
 # 🚚 SwiftRoute: delivery routes that survive real traffic
 
-**DataNova 2026 · Operations Research track · Last-Mile Delivery Route Optimization**
+**Live demo:** https://swiftroute-routes.streamlit.app · **DataNova 2026 · Operations Research track · Last-Mile Delivery Route Optimization**
 
 SwiftRoute plans every delivery truck's route around **truck capacity**, **customer time slots** and
 **real hourly traffic**, then **replays the whole day against real traffic** to prove the plan holds.
@@ -75,7 +75,7 @@ streamlit run app.py
 Windows: `py -3.13 -m pip install -r requirements.txt` then `py -3.13 -m streamlit run app.py`.
 Voice typing works best in Chrome or Edge; allow the microphone / location when asked.
 
-**Free online demo:** share.streamlit.io → sign in with GitHub → *Create app* → this repo, branch `main`, file `app.py` → *Deploy*.
+**Live demo:** https://swiftroute-routes.streamlit.app
 
 ## Limitations
 - Demo customers are generated (fixed seeds), not real orders.
