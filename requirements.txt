@@ -4,3 +4,6 @@ pydeck>=0.9
 pandas>=2.2
 requests>=2.31
 altair>=5
+streamlit-mic-recorder>=0.0.8
+SpeechRecognition>=3.10
+streamlit-js-eval>=1.0

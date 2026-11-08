@@ -55,3 +55,38 @@ def road_path(points):
         return r["routes"][0]["geometry"]["coordinates"]
     except Exception:
         return None
+
+
+def route_detail(points):
+    """Street-level route through the stops, with turn-by-turn steps (OSRM).
+    Returns {"legs": [{"coords": [[lon, lat], ...], "steps": [...]}, ...]} or None if offline.
+    Leg i goes from points[i] to points[i+1]."""
+    coords = ";".join(f"{lon:.6f},{lat:.6f}" for lat, lon in points)
+    try:
+        r = requests.get(f"https://router.project-osrm.org/route/v1/driving/{coords}",
+                         params={"overview": "false", "steps": "true", "geometries": "geojson"},
+                         timeout=60).json()
+        legs = []
+        for leg in r["routes"][0]["legs"]:
+            line, steps = [], []
+            for s in leg["steps"]:
+                g = s["geometry"]["coordinates"]
+                line += g if not line else g[1:]
+                m = s["maneuver"]
+                steps.append({"type": m["type"], "modifier": m.get("modifier", ""), "name": s.get("name", ""),
+                              "km": s["distance"] / 1000, "exit": m.get("exit")})
+            legs.append({"coords": line, "steps": steps})
+        return {"legs": legs}
+    except Exception:
+        return None
+
+
+def reverse(lat, lon):
+    """Map point -> street address (OpenStreetMap). Returns a string or None."""
+    try:
+        r = requests.get("https://nominatim.openstreetmap.org/reverse",
+                         params={"lat": lat, "lon": lon, "format": "json", "zoom": 18},
+                         headers={"User-Agent": "SwiftRoute-hackathon-demo"}, timeout=20).json()
+        return r.get("display_name")
+    except Exception:
+        return None
