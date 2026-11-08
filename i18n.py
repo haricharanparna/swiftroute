@@ -19,6 +19,13 @@ S = {
     "tab_about": {"en": "How it works", "es": "Cómo funciona", "fr": "Fonctionnement"},
     # sidebar
     "language": {"en": "Language", "es": "Idioma", "fr": "Langue"},
+    "theme": {"en": "Appearance", "es": "Apariencia", "fr": "Apparence"},
+    "dark": {"en": "Dark", "es": "Oscuro", "fr": "Sombre"},
+    "light": {"en": "Light", "es": "Claro", "fr": "Clair"},
+    "intro_tag": {"en": "Your everyday delivery co-pilot", "es": "Tu copiloto de reparto de cada día",
+                  "fr": "Votre copilote de livraison au quotidien"},
+    "intro_load": {"en": "Loading real roads and Chicago traffic…", "es": "Cargando calles reales y tráfico de Chicago…",
+                   "fr": "Chargement des routes et du trafic de Chicago…"},
     "shift": {"en": "Shift", "es": "Turno", "fr": "Service"},
     "day": {"en": "Day", "es": "Día", "fr": "Jour"},
     "start_hour": {"en": "Start hour", "es": "Hora de inicio", "fr": "Heure de début"},

@@ -16,6 +16,7 @@ SwiftRoute plans every delivery truck's route around **truck capacity**, **custo
 - 🎙️📍 **Voice typing & my location** for addresses
 - ♿ **Accessibility:** larger text, high contrast, colour-blind-safe colours, reduce motion, read-aloud, keyboard focus, screen-reader map text
 - 🌐 **English · Español · Français**
+- 🌗 **Light & dark mode**, plus an animated intro screen (skipped with *Reduce motion*)
 
 | Replay the day | Driver directions | Español + high contrast |
 |---|---|---|

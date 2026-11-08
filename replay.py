@@ -40,33 +40,37 @@ def trips(routes, points, details):
     return out
 
 
-def html(trip_data, stops, depot, colors, start_hour, labels, autoplay=True, height=620):
+def html(trip_data, stops, depot, colors, start_hour, labels, autoplay=True, light=False, height=620):
     """stops: [{"lon", "lat", "t" (minute delivered), "truck", "name"}]"""
     end = max((max(t["ts"]) for t in trip_data if t["ts"]), default=480)
     payload = json.dumps({"trips": trip_data, "stops": stops, "depot": depot, "colors": colors,
                           "start": start_hour, "end": end, "labels": labels, "autoplay": autoplay}).replace("</", "<\\/")
+    bg, panel, line, txt, muted, style = (
+        ("#F4F6FB", "rgba(255,255,255,.88)", "#E2E8F0", "#0F172A", "#526077", "positron-gl-style") if light else
+        ("#070B17", "rgba(10,16,32,.82)", "#1E293B", "#E2E8F0", "#94A3B8", "dark-matter-gl-style"))
+    pending = "[148,163,184]" if light else "[71,85,105]"
     return f"""<!doctype html><html><head><meta charset="utf-8">
 <link href="app/static/maplibre-gl.css" rel="stylesheet">
 <script src="app/static/maplibre-gl.js"></script>
 <script src="app/static/deck.min.js"></script>
 <style>
- html,body{{margin:0;height:100%;background:#070B17;font-family:Inter,system-ui,sans-serif;color:#E2E8F0;overflow:hidden}}
+ html,body{{margin:0;height:100%;background:{bg};font-family:Inter,system-ui,sans-serif;color:{txt};overflow:hidden}}
  #map{{position:absolute;inset:0;border-radius:16px;overflow:hidden}}
- .hud{{position:absolute;left:16px;top:16px;background:rgba(10,16,32,.82);backdrop-filter:blur(8px);
-      border:1px solid #1E293B;border-radius:14px;padding:14px 18px;min-width:210px;z-index:2}}
+ .hud{{position:absolute;left:16px;top:16px;background:{panel};backdrop-filter:blur(8px);
+      border:1px solid {line};border-radius:14px;padding:14px 18px;min-width:210px;z-index:2}}
  .clock{{font:700 38px 'JetBrains Mono',ui-monospace,monospace;letter-spacing:-.02em;
         background:linear-gradient(90deg,#22D3EE,#C084FC);-webkit-background-clip:text;-webkit-text-fill-color:transparent}}
- .sub{{color:#94A3B8;font-size:13px;margin-top:2px}} .sub b{{color:#4ADE80;font-size:15px}}
+ .sub{{color:{muted};font-size:13px;margin-top:2px}} .sub b{{color:#4ADE80;font-size:15px}}
  .ctrl{{position:absolute;left:16px;right:16px;bottom:16px;display:flex;gap:12px;align-items:center;z-index:2;
-       background:rgba(10,16,32,.82);backdrop-filter:blur(8px);border:1px solid #1E293B;border-radius:14px;padding:10px 14px}}
+       background:{panel};backdrop-filter:blur(8px);border:1px solid {line};border-radius:14px;padding:10px 14px}}
  button,select{{background:linear-gradient(135deg,#06B6D4,#8B5CF6);color:#fff;border:0;border-radius:10px;
        padding:8px 16px;font-weight:700;cursor:pointer;font-size:14px}}
- select{{background:#0F1629;border:1px solid #334155}}
+ select{{background:{panel};color:{txt};border:1px solid {line}}}
  .home{{position:absolute;right:16px;top:16px;z-index:2;width:48px;height:48px;padding:0;font-size:24px;
-       background:rgba(10,16,32,.82);border:1px solid #334155;border-radius:12px}}
+       background:{panel};color:{txt};border:1px solid {line};border-radius:12px}}
  button:focus-visible,select:focus-visible,input:focus-visible{{outline:3px solid #FACC15;outline-offset:2px}}
  input[type=range]{{flex:1;accent-color:#22D3EE}}
- .bar{{height:6px;background:#1E293B;border-radius:9px;margin-top:10px;overflow:hidden}} .bar i{{display:block;height:100%;
+ .bar{{height:6px;background:{line};border-radius:9px;margin-top:10px;overflow:hidden}} .bar i{{display:block;height:100%;
        background:linear-gradient(90deg,#22D3EE,#4ADE80);width:0}}
 </style></head><body>
 <div id="map" role="img" aria-label="{labels['aria']}"></div>
@@ -75,7 +79,7 @@ def html(trip_data, stops, depot, colors, start_hour, labels, autoplay=True, hei
 <button class="home" id="home" title="{labels['fit']}" aria-label="{labels['fit']}">⌂</button>
 <div class="ctrl"><button id="play" aria-label="{labels['play']}">▶ {labels['play']}</button>
  <input id="time" type="range" min="0" max="1000" value="0" aria-label="time">
- <label style="font-size:13px;color:#94A3B8">{labels['speed']}
+ <label style="font-size:13px;color:{muted}">{labels['speed']}
   <select id="spd"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select></label></div>
 <script>
 const D = {payload};
@@ -100,7 +104,7 @@ function layers() {{
       getColor:d=>C[d.truck%C.length], widthMinPixels:5, trailLength:60, currentTime:T, fadeTrail:true,
       capRounded:true, jointRounded:true}}),
     new deck.ScatterplotLayer({{id:'stops', data:D.stops, getPosition:d=>[d.lon,d.lat], radiusMinPixels:5, getRadius:60,
-      getFillColor:d=> d.t===null ? [248,113,113] : (T>=d.t ? [74,222,128] : [71,85,105]),
+      getFillColor:d=> d.t===null ? [248,113,113] : (T>=d.t ? [34,197,94] : {pending}),
       stroked:true, getLineColor:[7,11,23], lineWidthMinPixels:2, pickable:true, updateTriggers:{{getFillColor:T}}}}),
     new deck.ScatterplotLayer({{id:'glow', data:heads(T), getPosition:d=>d.pos, getRadius:260, radiusMinPixels:12,
       getFillColor:d=>[...C[d.truck%C.length],70]}}),
@@ -123,7 +127,7 @@ function homeView() {{
 const opts = {{container:'map', controller:true,
   initialViewState: homeView(),
   getTooltip:({{object}}) => object && object.name ? object.name : null, layers:layers()}};
-try {{ if (window.maplibregl) {{ opts.map = maplibregl; opts.mapStyle = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'; }} }} catch(e) {{}}
+try {{ if (window.maplibregl) {{ opts.map = maplibregl; opts.mapStyle = 'https://basemaps.cartocdn.com/gl/{style}/style.json'; }} }} catch(e) {{}}
 const view = new deck.DeckGL(opts);
 const pad = n => String(Math.floor(n)).padStart(2,'0');
 function draw() {{
