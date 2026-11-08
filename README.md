@@ -117,4 +117,4 @@ Voice typing works best in Chrome or Edge; allow the microphone / location when 
 - SwiftRoute sometimes drives more km: it trades distance for fewer driver hours and late deliveries.
 - Uses free public OSRM / Nominatim / Google speech servers, fine for demos; production would self-host.
 
-See [docs/RUBRIC_CHECK.md](docs/RUBRIC_CHECK.md) · [docs/PITCH_SCRIPT.md](docs/PITCH_SCRIPT.md) · [docs/VIDEO_PLAN.md](docs/VIDEO_PLAN.md)
+📄 **[How We Built SwiftRoute (PDF)](docs/How_We_Built_SwiftRoute.pdf)** · See [docs/RUBRIC_CHECK.md](docs/RUBRIC_CHECK.md) · [docs/PITCH_SCRIPT.md](docs/PITCH_SCRIPT.md) · [docs/VIDEO_PLAN.md](docs/VIDEO_PLAN.md)
