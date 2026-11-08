@@ -29,11 +29,12 @@
 
 **Slide 8: How it works** (40 s)
 Diagram: Addresses → OpenStreetMap → real drive times × hourly traffic → OR-Tools optimizer (capacity, time slots, cost) → hour-by-hour replay → KPIs, map, directions.
-"Key idea: we don't trust our own plan. Every route, ours and the baseline's, is replayed with real traffic, and all numbers come from that replay."
+"Two uses of traffic. To plan, the optimizer uses the traffic at the hour we *expect* each drive to happen. Then we replay every route minute by minute with the traffic of the hour it *actually* happens. If that makes something late, the replay shows it, and all our numbers come from the replay. The benchmark is deliberately simple, nearest stop that fits, like hand-planning, not a second optimizer."
 
 **Slide 9: Results & validation** (50 s)
 - Scenario table: bigger trucks → **100% on time**. "The fleet is limited by truck size more than time: a decision a manager can act on."
-- Robustness: "We tested **10 different days**. SwiftRoute was cheaper and more on time on **all 10**. Average **30% cheaper, +23.5 points on time**."
+- Delivered counts next to cost: "With 4 small trucks, 3 of 40 orders can't make their slot (the simple method misses 5). On-time % is out of all orders, so those count against us."
+- Robustness: "We tested **10 different days**. SwiftRoute was cheaper and more on time on **all 10**. Average **31% cheaper, +23.2 points on time**, and it delivered at least as many orders every day, so the savings aren't from skipping work."
 - Limitations: generated demo customers; one city-wide traffic factor per hour.
 
 **Slide 10: Impact & next steps** (30 s)
@@ -43,4 +44,6 @@ Diagram: Addresses → OpenStreetMap → real drive times × hourly traffic → 
 - *Why not just Google Maps?* Google routes one vehicle. We split work across a fleet with capacity and time slots, then hand each driver's route to Google Maps.
 - *How do you know it's better?* Same days, same traffic replay, two methods: 10/10 days cheaper and more on time.
 - *Does it scale?* OR-Tools handles hundreds of stops; production would self-host OSRM.
+- *Isn't the baseline too weak?* It's meant to be: it's how small fleets plan by hand today. It respects capacity; we measure its lateness in the same replay. Beating hand-planning is the real-world bar.
+- *Do you skip deliveries to look cheaper?* No: we deliver at least as many as the benchmark on all 10 days, and missed orders count against our on-time %.
 - *Why more km sometimes?* Cost = fuel + driver time; a slightly longer route that avoids waiting and lateness is cheaper overall.

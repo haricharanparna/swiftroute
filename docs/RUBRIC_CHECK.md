@@ -25,7 +25,7 @@ Problem statement: **Last-Mile Delivery Route Optimization** (Operations Researc
 | Innovation & Originality | 20% | Real-traffic **replay** of every route ("honest check") instead of trusting the plan; animated day replay; chaos mode; voice + location input; 3 languages |
 | Technical Implementation | 25% | OR-Tools VRP with capacity + time windows + cost objective; time-dependent drive times; OSRM real roads + turn-by-turn; 2.66 M-reading data pipeline; bundled deck.gl animation |
 | Problem Relevance | 15% | Exactly the stated problem; all three constraints (capacity, time windows, traffic) handled |
-| Data & Analytical Rigor | 15% | Real public data (City of Chicago, OpenStreetMap); per-segment free-flow normalisation; baseline comparison; 6 scenarios; **10-day robustness test: cheaper 10/10 days, mean −30.4%, +23.5 pts on time** |
+| Data & Analytical Rigor | 15% | Real public data (City of Chicago, OpenStreetMap); per-segment free-flow normalisation; baseline comparison; 6 scenarios; **10-day robustness test: cheaper 10/10 days, mean −31.0%, +23.2 pts on time, delivered ≥ benchmark every day (36.4 vs 35.2 of 40)** |
 | Impact & Feasibility | 15% | Free/open stack, runs on a laptop; Google Maps hand-off for drivers; ~$119/day saved for a 4-truck depot (≈ $30k/year at 250 days) |
 | Presentation & Documentation | 10% | Polished UI, accessibility, README, rubric map, script + video plan |
 
@@ -43,5 +43,8 @@ Problem statement: **Last-Mile Delivery Route Optimization** (Operations Researc
 ## Honest limitations (say them before they're asked)
 - Customers in the demo are generated (fixed seeds), not real orders.
 - Traffic is one city-wide factor per hour (arterial streets, bus-GPS estimates), not per street.
+- Planning uses traffic at each stop's *expected* hour; the replay applies the *actual* hour. The replay is what we report.
+- The benchmark is deliberately simple (nearest stop that fits; no closing-time planning), standing in for hand-planning, not a second optimizer.
+- With 4 small trucks ~3–4 of 40 orders can't make their slot; they're shown as undelivered and counted against on-time %.
 - SwiftRoute sometimes drives more km than the simple method: it trades a little distance for fewer driver hours and fewer late deliveries (cost and on-time still win 10/10 days).
 - Free public OSRM / Nominatim servers: fine for a demo; production would self-host them.

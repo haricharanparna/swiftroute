@@ -209,6 +209,11 @@ with plan_tab:
     with st.spinner(t("optimizing")):
         r = st.cache_data(run, show_spinner=False)(depot, stops, trucks, capacity, profile, day, start_hour, jam / 100)
     s, b = r["smart_kpi"], r["naive_kpi"]
+    if not r["smart"]:
+        st.error({"en": "No plan could be found for these settings. Try more trucks, bigger trucks or a different shift.",
+                  "es": "No se encontró un plan con estos ajustes. Prueba más camiones, camiones más grandes u otro turno.",
+                  "fr": "Aucun plan trouvé avec ces réglages. Essayez plus de camions, des camions plus grands ou un autre horaire."}[lang])
+        st.stop()
     routes = r["naive"] if show_naive else r["smart"]
     pts, st_list = r["points"], r["stops"]
     details = [detail_cached(tuple(pts[x] for x, _ in route)) for route in routes]

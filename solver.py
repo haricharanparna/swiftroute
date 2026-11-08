@@ -1,7 +1,9 @@
 """Route planning.
 
 solve()    -> smart plan with Google OR-Tools (respects truck capacity + time slots)
-baseline() -> "go to the nearest stop next", what many small businesses do
+baseline() -> "go to the nearest stop next": a deliberately simple benchmark of how many small fleets
+              plan by hand (respects truck capacity, but not closing times; lateness is measured afterwards).
+              It is NOT a second optimizer.
 Times are minutes after the shift starts. Stop 0 is the depot.
 """
 from ortools.constraint_solver import pywrapcp, routing_enums_pb2
@@ -46,6 +48,8 @@ def solve(dist, mins, demands, windows, n_trucks, capacity, seconds=5):
     p.local_search_metaheuristic = routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH
     p.time_limit.seconds = seconds
     sol = model.SolveWithParameters(p)
+    if sol is None:          # no plan found in the time limit: report every stop as not delivered
+        return []
 
     routes = []
     for v in range(n_trucks):

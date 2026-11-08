@@ -17,6 +17,7 @@ for seed in range(1, 11):
     s, b = r["smart_kpi"], r["naive_kpi"]
     rows.append({"day (seed)": seed, "SwiftRoute cost": s["Cost ($)"], "Simple cost": b["Cost ($)"],
                  "Saving %": round(100 * (b["Cost ($)"] - s["Cost ($)"]) / b["Cost ($)"], 1),
+                 "SwiftRoute delivered": s["Delivered"], "Simple delivered": b["Delivered"],
                  "SwiftRoute on time %": s["On time %"], "Simple on time %": b["On time %"],
                  "SwiftRoute km": s["Total km"], "Simple km": b["Total km"]})
     print("done", seed, rows[-1]["Saving %"], flush=True)
@@ -27,4 +28,6 @@ print(df.to_string(index=False))
 d = df["SwiftRoute on time %"] - df["Simple on time %"]
 print(f"\nCost saving: mean {df['Saving %'].mean():.1f}%  (min {df['Saving %'].min():.1f}%, max {df['Saving %'].max():.1f}%)")
 print(f"On-time gain: mean {d.mean():+.1f} pts  (min {d.min():+.1f}, max {d.max():+.1f})")
+dl = lambda col: df[col].str.split("/").str[0].astype(int)
+print(f"Delivered: SwiftRoute mean {dl('SwiftRoute delivered').mean():.1f}/40, simple mean {dl('Simple delivered').mean():.1f}/40")
 print(f"SwiftRoute cheaper on {(df['Saving %'] > 0).sum()}/10 days, more on time on {(d > 0).sum()}/10 days")

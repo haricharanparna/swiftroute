@@ -23,7 +23,8 @@ def run_all(profile, day=3, capacity=15, seconds=10, progress=None):
         rows.append({"Scenario": name, "Trucks": s["Trucks used"], "Delivered": s["Delivered"],
                      "On time %": s["On time %"], "Km": s["Total km"], "Cost ($)": s["Cost ($)"],
                      "CO2 (kg)": s["CO2 (kg)"],
-                     "Simple method on time %": b["On time %"], "Simple method cost ($)": b["Cost ($)"]})
+                     "Simple method delivered": b["Delivered"], "Simple method on time %": b["On time %"],
+                     "Simple method cost ($)": b["Cost ($)"]})
         if progress:
             progress(i + 1, len(CASES), name)
     return pd.DataFrame(rows)

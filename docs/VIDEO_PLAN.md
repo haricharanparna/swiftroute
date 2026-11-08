@@ -12,6 +12,6 @@ Record at 1920×1080, browser zoom 90%, dark mode. Use OBS or the Windows Game B
 | 1:30–1:45 | Driver directions tab → click *Open in Google Maps*. | "Each driver gets turn-by-turn directions and one tap into Google Maps." |
 | 1:45–2:00 | Switch to Español, High contrast, press Read aloud (let it speak 3 s). | "English, Spanish and French. High contrast, colour-blind-safe colours, voice input and read-aloud." |
 | 2:00–2:15 | Traffic data heatmap, then What if? charts. | "Built on 2.66 million real speed readings. Six what-if scenarios show bigger trucks reach 100% on time." |
-| 2:15–2:30 | Slide: "10/10 days cheaper · −30% cost · +23.5 pts on time" + GitHub link. | "Tested on ten different days, it won every one. SwiftRoute: free, open, and ready for any small fleet." |
+| 2:15–2:30 | Slide: "10/10 days cheaper · −31% cost · +23.2 pts on time" + GitHub link. | "Tested on ten different days, it won every one. SwiftRoute: free, open, and ready for any small fleet." |
 
 **Tips:** do one rehearsal; keep the mouse slow; if the street map doesn't load, the routes still show on a dark background.
