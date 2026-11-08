@@ -1,0 +1,7 @@
+Scenario,Trucks,Delivered,On time %,Km,Cost ($),CO2 (kg),Simple method on time %,Simple method cost ($)
+"Normal day (40 stops, 4 trucks, leave 9am)",4,37/40,92.5,156.9,278,39.2,67.5,387
++1 truck,5,40/40,100.0,158.8,286,39.7,75.0,435
+Traffic 30% worse,4,37/40,92.5,137.4,313,34.3,65.0,430
+Leave at 7am (same customers),4,37/40,92.5,156.9,278,39.2,67.5,387
+Orders double (80 stops),4,44/80,55.0,119.0,243,29.7,40.0,399
+Orders double + 4 more trucks,8,75/80,93.8,276.6,507,69.1,62.5,759
